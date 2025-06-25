@@ -29,15 +29,9 @@
       cursor: pointer;
       background-size: cover;
       background-position: center;
-      transition: opacity 0.3s;
     }
     .pixel:hover {
       background-color: #555;
-    }
-    .sold {
-      opacity: 0.5;
-      cursor: default !important;
-      pointer-events: none;
     }
     #popup {
       position: fixed;
@@ -91,8 +85,6 @@
     const popup = document.getElementById("popup");
     const popupContent = document.getElementById("popup-content");
 
-    const soldBlocks = new Set([233, 999, 4578]); // בלוקים שכבר תפוסים
-
     function showPopup(index) {
       popupContent.innerHTML = `
         <strong>Want to buy square #${index}?</strong><br><br>
@@ -106,32 +98,32 @@
       popup.style.display = "none";
     }
 
-    fetch("blocks.json")
-      .then(res => res.json())
-      .then(blocksWithImages => {
-        const blockSet = new Set(blocksWithImages);
+    let i = 0;
+    const batchSize = 50; // כמה בלוקים לטעון בכל פעם
+    const delay = 500;      // כל כמה מילישניות לטעון עוד
 
-        for (let i = 0; i < 10000; i++) {
-          const pixel = document.createElement("div");
-          pixel.className = "pixel";
+    function loadBatch() {
+      for (let j = 0; j < batchSize && i < 10000; j++, i++) {
+        const pixel = document.createElement("div");
+        pixel.className = "pixel";
+        pixel.dataset.index = i;
+        pixel.onclick = () => showPopup(i);
 
-          if (soldBlocks.has(i)) {
-            pixel.classList.add("sold");
-          } else {
-            pixel.onclick = () => showPopup(i);
-          }
+        const img = new Image();
+        img.src = `blocks/block${i}.png`;
+        img.onload = () => {
+          pixel.style.backgroundImage = `url(${img.src})`;
+        };
 
-          if (blockSet.has(i)) {
-            const img = new Image();
-            img.src = `blocks/block${i}.png`;
-            img.onload = () => {
-              pixel.style.backgroundImage = `url(${img.src})`;
-            };
-          }
+        grid.appendChild(pixel);
+      }
 
-          grid.appendChild(pixel);
-        }
-      });
+      if (i < 10000) {
+        setTimeout(loadBatch, delay); // נטען את הבאים עוד רגע
+      }
+    }
+
+    loadBatch();
   </script>
 </body>
 </html>
