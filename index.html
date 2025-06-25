@@ -2,16 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Billboard Blocks</title>
-  <link href="https://fonts.googleapis.com/css2?family=Rubik&display=swap" rel="stylesheet" />
   <style>
-    body {
-      margin: 0;
-      background: #111;
-      overflow: hidden;
-      font-family: 'Rubik', sans-serif;
-    }
     #grid {
       display: grid;
       grid-template-columns: repeat(100, 10px);
@@ -33,108 +25,33 @@
     .pixel:hover {
       background-color: #555;
     }
-    #popup {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: #fff;
-      color: #000;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.5);
-      display: none;
-      z-index: 1000;
-      max-width: 300px;
-      text-align: center;
-    }
-    #popup button {
-      margin-top: 10px;
-      padding: 6px 12px;
-      border: none;
-      background: #111;
-      color: #fff;
-      cursor: pointer;
-      border-radius: 4px;
-      font-family: 'Rubik', sans-serif;
-    }
-    #popup a {
-      display: inline-block;
-      margin-top: 10px;
-      padding: 6px 12px;
-      background: #5865F2;
-      color: #fff;
-      text-decoration: none;
-      border-radius: 4px;
-      font-weight: bold;
-      font-family: 'Rubik', sans-serif;
-    }
   </style>
 </head>
 <body>
   <div id="grid"></div>
 
-  <div id="popup">
-    <div id="popup-content"></div>
-    <a href="https://discord.gg/your-server-code" target="_blank">Purchase on Discord</a>
-    <button onclick="closePopup()">Close</button>
-  </div>
-
   <script>
     const grid = document.getElementById("grid");
-    const popup = document.getElementById("popup");
-    const popupContent = document.getElementById("popup-content");
 
-    function showPopup(index) {
-      popupContent.innerHTML = `
-        <strong>Want to buy square #${index}?</strong><br><br>
-        To purchase this square, please join our Discord server and contact us there.<br>
-        Payment and image submission are handled inside the Discord server only.
-      `;
-      popup.style.display = "block";
-    }
+    fetch("/.netlify/functions/listBlocks")
+      .then(response => response.json())
+      .then(blocksWithImages => {
+        const blockSet = new Set(blocksWithImages);
 
-    function closePopup() {
-      popup.style.display = "none";
-    }
+        for (let i = 0; i < 10000; i++) {
+          const pixel = document.createElement("div");
+          pixel.className = "pixel";
+          pixel.dataset.index = i;
 
-    let i = 0;
-    const batchSize = 50; // כמה בלוקים לטעון בכל פעם
-    const delay = 500;      // כל כמה מילישניות לטעון עוד
+          if (blockSet.has(i)) {
+            pixel.style.backgroundImage = `url(blocks/block${i}.png)`;
+          }
 
-    function loadBatch() {
-      for (let j = 0; j < batchSize && i < 10000; j++, i++) {
-        const pixel = document.createElement("div");
-        pixel.className = "pixel";
-        pixel.dataset.index = i;
-        pixel.onclick = () => showPopup(i);
+          pixel.onclick = () => alert(`Clicked on block #${i}`);
 
-        const img = new Image();
-        img.src = `blocks/block${i}.png`;
-        img.onload = () => {
-          pixel.style.backgroundImage = `url(${img.src})`;
-        };
-
-        grid.appendChild(pixel);
-      }
-
-      if (i < 10000) {
-        setTimeout(loadBatch, delay); // נטען את הבאים עוד רגע
-      }
-    }
-function showPopup(index) {
-  const imageUrl = `blocks/block${index}.png`;
-
-  popupContent.innerHTML = `
-    <strong>Square #${index}</strong><br><br>
-    <img src="${imageUrl}" alt="Block Image" style="max-width: 100%; border-radius: 6px; margin-bottom: 10px;" onerror="this.style.display='none'" />
-    To purchase this square, please join our Discord server and contact us there.<br>
-    Payment and image submission are handled inside the Discord server only.
-  `;
-  popup.style.display = "block";
-}
-
-    loadBatch();
+          grid.appendChild(pixel);
+        }
+      });
   </script>
 </body>
 </html>
