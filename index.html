@@ -122,6 +122,17 @@
         setTimeout(loadBatch, delay); // נטען את הבאים עוד רגע
       }
     }
+function showPopup(index) {
+  const imageUrl = `blocks/block${index}.png`;
+
+  popupContent.innerHTML = `
+    <strong>Square #${index}</strong><br><br>
+    <img src="${imageUrl}" alt="Block Image" style="max-width: 100%; border-radius: 6px; margin-bottom: 10px;" onerror="this.style.display='none'" />
+    To purchase this square, please join our Discord server and contact us there.<br>
+    Payment and image submission are handled inside the Discord server only.
+  `;
+  popup.style.display = "block";
+}
 
     loadBatch();
   </script>
