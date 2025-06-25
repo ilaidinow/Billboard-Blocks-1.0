@@ -91,8 +91,7 @@
     const popup = document.getElementById("popup");
     const popupContent = document.getElementById("popup-content");
 
-    // רשימת בלוקים שנמכרו (דוגמא)
-    const soldBlocks = new Set([233, 1001, 4578]);
+    const soldBlocks = new Set([233, 999, 4578]); // בלוקים שכבר תפוסים
 
     function showPopup(index) {
       popupContent.innerHTML = `
@@ -107,26 +106,32 @@
       popup.style.display = "none";
     }
 
-    for (let i = 0; i < 10000; i++) {
-      const pixel = document.createElement("div");
-      pixel.className = "pixel";
+    fetch("blocks.json")
+      .then(res => res.json())
+      .then(blocksWithImages => {
+        const blockSet = new Set(blocksWithImages);
 
-      // אם הבלוק תפוס - לא ניתן ללחוץ עליו, ומוסיפים מחלקת CSS
-      if (soldBlocks.has(i)) {
-        pixel.classList.add("sold");
-      } else {
-        pixel.onclick = () => showPopup(i);
-      }
+        for (let i = 0; i < 10000; i++) {
+          const pixel = document.createElement("div");
+          pixel.className = "pixel";
 
-      const img = new Image();
-      img.src = `blocks/block${i}.png`;
-      img.onload = () => {
-        pixel.style.backgroundImage = `url(${img.src})`;
-      };
-      // אם אין תמונה - פשוט משאיר רקע כהה
+          if (soldBlocks.has(i)) {
+            pixel.classList.add("sold");
+          } else {
+            pixel.onclick = () => showPopup(i);
+          }
 
-      grid.appendChild(pixel);
-    }
+          if (blockSet.has(i)) {
+            const img = new Image();
+            img.src = `blocks/block${i}.png`;
+            img.onload = () => {
+              pixel.style.backgroundImage = `url(${img.src})`;
+            };
+          }
+
+          grid.appendChild(pixel);
+        }
+      });
   </script>
 </body>
 </html>
